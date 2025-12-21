@@ -1,0 +1,54 @@
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: strapi-postgres
+    environment:
+      POSTGRES_DB: strapidb
+      POSTGRES_USER: strapi
+      POSTGRES_PASSWORD: strapipassword
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+    networks:
+      - strapi_network
+
+  strapi:
+    build:
+      context: .
+    container_name: strapi-app
+    ports:
+      - "1337:1337"
+    environment:
+      NODE_ENV: production
+      HOST: 0.0.0.0
+      PORT: 1337
+      DATABASE_CLIENT: postgres
+      DATABASE_HOST: postgres
+      DATABASE_PORT: 5432
+      DATABASE_NAME: strapidb
+      DATABASE_USERNAME: strapi
+      DATABASE_PASSWORD: strapipassword
+      APP_KEYS: key1,key2,key3,key4
+      JWT_SECRET: myJwtSecret
+      ADMIN_JWT_SECRET: myAdminSecret
+      API_TOKEN_SALT: myApiTokenSalt
+      TRANSFER_TOKEN_SALT: myTransferTokenSalt
+    volumes:
+      - strapi_uploads:/app/public/uploads
+    depends_on:
+      - postgres
+    restart: unless-stopped
+    networks:
+      - strapi_network
+
+networks:
+  strapi_network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+    driver: local
+  strapi_uploads:
+    driver: local

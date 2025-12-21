@@ -1,0 +1,51 @@
+# Dependencies
+node_modules/
+
+# Build artifacts (we build inside Docker)
+# build/
+
+# Database
+.tmp/
+data/
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Git
+.git/
+.gitignore
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+
+# Terraform
+terraform/
+*.tfstate
+*.tfstate.*
+.terraform/
+
+# Tests
+coverage/
+*.test.js
+__tests__/
+
+# Documentation
+*.md
+!README.md
+
+# Misc
+.dockerignore
+docker-compose*.yml

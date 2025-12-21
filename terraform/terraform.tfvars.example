@@ -1,0 +1,20 @@
+# ==============================================================================
+# TERRAFORM VARIABLES TEMPLATE
+# ==============================================================================
+# Copy this file to terraform.tfvars and fill in your values
+# DO NOT commit terraform.tfvars to Git!
+# ==============================================================================
+
+# Database Configuration
+db_password = "your-secure-database-password"
+
+# Strapi Secrets (generate unique values for each)
+# You can generate these using: openssl rand -base64 32
+app_keys           = "key1,key2,key3,key4"
+jwt_secret         = "your-jwt-secret"
+admin_jwt_secret   = "your-admin-jwt-secret"
+api_token_salt     = "your-api-token-salt"
+transfer_token_salt = "your-transfer-token-salt"
+
+# Monitoring Configuration
+alert_email = "your-email@example.com"
