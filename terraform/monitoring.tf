@@ -27,35 +27,48 @@ resource "aws_cloudwatch_dashboard" "strapi" {
         type = "metric"
         properties = {
           metrics = [
-            ["AWS/ECS", "CPUUtilization", { stat = "Average" }],
-            ["AWS/ECS", "MemoryUtilization", { stat = "Average" }]
+            ["AWS/ECS", "CPUUtilization", "ClusterName", aws_ecs_cluster.this.name, "ServiceName", aws_ecs_service.this.name, { stat = "Average" }],
+            [".", "MemoryUtilization", ".", ".", ".", ".", { stat = "Average" }]
           ]
           period = 300
           stat   = "Average"
           region = var.region
           title  = "ECS CPU & Memory"
+          yAxis = {
+            left = {
+              min = 0
+              max = 100
+            }
+          }
         }
       },
       {
         type = "metric"
         properties = {
           metrics = [
-            ["AWS/ApplicationELB", "TargetResponseTime", { stat = "Average" }],
-            ["AWS/ApplicationELB", "RequestCount", { stat = "Sum" }]
+            ["AWS/ApplicationELB", "TargetResponseTime", "LoadBalancer", aws_lb.strapi.arn_suffix, { stat = "Average", yAxis = "left" }],
+            [".", "RequestCount", ".", ".", { stat = "Sum", yAxis = "right" }]
           ]
           period = 300
-          stat   = "Average"
           region = var.region
           title  = "ALB Performance"
+          yAxis = {
+            left = {
+              label = "Response Time (seconds)"
+            }
+            right = {
+              label = "Request Count"
+            }
+          }
         }
       },
       {
         type = "metric"
         properties = {
           metrics = [
-            ["AWS/ApplicationELB", "HTTPCode_Target_5XX_Count", { stat = "Sum" }],
-            ["AWS/ApplicationELB", "HTTPCode_Target_4XX_Count", { stat = "Sum" }],
-            ["AWS/ApplicationELB", "HTTPCode_Target_2XX_Count", { stat = "Sum" }]
+            ["AWS/ApplicationELB", "HTTPCode_Target_2XX_Count", "LoadBalancer", aws_lb.strapi.arn_suffix, { stat = "Sum" }],
+            [".", "HTTPCode_Target_4XX_Count", ".", ".", { stat = "Sum" }],
+            [".", "HTTPCode_Target_5XX_Count", ".", ".", { stat = "Sum" }]
           ]
           period = 300
           stat   = "Sum"
@@ -67,8 +80,8 @@ resource "aws_cloudwatch_dashboard" "strapi" {
         type = "metric"
         properties = {
           metrics = [
-            ["AWS/ApplicationELB", "HealthyHostCount", { stat = "Average" }],
-            ["AWS/ApplicationELB", "UnHealthyHostCount", { stat = "Average" }]
+            ["AWS/ApplicationELB", "HealthyHostCount", "TargetGroup", aws_lb_target_group.strapi.arn_suffix, "LoadBalancer", aws_lb.strapi.arn_suffix, { stat = "Average" }],
+            [".", "UnHealthyHostCount", ".", ".", ".", ".", { stat = "Average" }]
           ]
           period = 300
           stat   = "Average"
@@ -80,8 +93,8 @@ resource "aws_cloudwatch_dashboard" "strapi" {
         type = "metric"
         properties = {
           metrics = [
-            ["ECS/ContainerInsights", "NetworkRxBytes", { stat = "Sum" }],
-            ["ECS/ContainerInsights", "NetworkTxBytes", { stat = "Sum" }]
+            ["ECS/ContainerInsights", "NetworkRxBytes", "ClusterName", aws_ecs_cluster.this.name, "ServiceName", aws_ecs_service.this.name, { stat = "Sum" }],
+            [".", "NetworkTxBytes", ".", ".", ".", ".", { stat = "Sum" }]
           ]
           period = 300
           stat   = "Sum"
@@ -93,7 +106,7 @@ resource "aws_cloudwatch_dashboard" "strapi" {
         type = "metric"
         properties = {
           metrics = [
-            ["AWS/ECS", "RunningTaskCount", { stat = "Average" }]
+            ["AWS/ECS", "RunningTaskCount", "ServiceName", aws_ecs_service.this.name, "ClusterName", aws_ecs_cluster.this.name, { stat = "Average" }]
           ]
           period = 300
           stat   = "Average"

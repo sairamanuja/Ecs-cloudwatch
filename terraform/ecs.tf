@@ -82,8 +82,11 @@ resource "aws_ecs_service" "this" {
   cluster         = aws_ecs_cluster.this.id
   task_definition = aws_ecs_task_definition.this.arn
   desired_count   = 1
-  launch_type     = "FARGATE"
-
+  capacity_provider_strategy {
+    capacity_provider = "FARGATE_SPOT"
+    weight           = 10
+    base            = 0
+  }
   depends_on = [aws_db_instance.strapi, aws_lb_listener.http]
 
   network_configuration {
