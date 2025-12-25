@@ -10,7 +10,7 @@ variable "region" {
 variable "project_name" {
   description = "Name of the project, used for resource naming"
   type        = string
-  default     = "strapi"
+  default     = "strapi-ramanuja"
 }
 
 # ==============================================================================
@@ -80,12 +80,4 @@ variable "transfer_token_salt" {
   description = "Salt for transfer token generation"
   type        = string
   sensitive   = true
-}
-
-# ==============================================================================
-# MONITORING CONFIGURATION
-# ==============================================================================
-variable "alert_email" {
-  description = "Email address for CloudWatch alerts"
-  type        = string
 }

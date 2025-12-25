@@ -75,18 +75,20 @@ resource "aws_ecs_task_definition" "this" {
 }
 
 # ==============================================================================
-# ECS SERVICE
+# ECS SERVICE (Blue/Green Deployment with CodeDeploy)
 # ==============================================================================
 resource "aws_ecs_service" "this" {
   name            = "${var.project_name}-service"
   cluster         = aws_ecs_cluster.this.id
   task_definition = aws_ecs_task_definition.this.arn
   desired_count   = 1
-  capacity_provider_strategy {
-    capacity_provider = "FARGATE_SPOT"
-    weight           = 10
-    base            = 0
+  launch_type     = "FARGATE"
+  
+  # Use CODE_DEPLOY for Blue/Green deployment
+  deployment_controller {
+    type = "CODE_DEPLOY"
   }
+
   depends_on = [aws_db_instance.strapi, aws_lb_listener.http]
 
   network_configuration {
@@ -98,8 +100,9 @@ resource "aws_ecs_service" "this" {
     assign_public_ip = true
   }
 
+  # Initial load balancer config points to Blue target group
   load_balancer {
-    target_group_arn = aws_lb_target_group.strapi.arn
+    target_group_arn = aws_lb_target_group.blue.arn
     container_name   = "strapi"
     container_port   = 1337
   }
@@ -108,6 +111,11 @@ resource "aws_ecs_service" "this" {
 
   tags = {
     Name = "${var.project_name}-service"
+  }
+
+  # CodeDeploy manages the task definition and target groups after initial creation
+  lifecycle {
+    ignore_changes = [task_definition, load_balancer]
   }
 }
 

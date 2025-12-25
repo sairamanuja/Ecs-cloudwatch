@@ -1,0 +1,17 @@
+{
+  "version": 0.0,
+  "Resources": [
+    {
+      "TargetService": {
+        "Type": "AWS::ECS::Service",
+        "Properties": {
+          "TaskDefinition": "arn:aws:ecs:ap-south-1:301782007642:task-definition/strapi-ramanuja-task:1",
+          "LoadBalancerInfo": {
+            "ContainerName": "strapi",
+            "ContainerPort": 1337
+          }
+        }
+      }
+    }
+  ]
+}

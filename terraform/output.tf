@@ -66,27 +66,35 @@ output "alb_zone_id" {
   value       = aws_lb.strapi.zone_id
 }
 
-output "target_group_arn" {
-  description = "ARN of the target group"
-  value       = aws_lb_target_group.strapi.arn
+output "target_group_blue_arn" {
+  description = "ARN of the Blue target group"
+  value       = aws_lb_target_group.blue.arn
+}
+
+output "target_group_green_arn" {
+  description = "ARN of the Green target group"
+  value       = aws_lb_target_group.green.arn
 }
 
 # ==============================================================================
-# MONITORING OUTPUTS
+# CODEDEPLOY OUTPUTS
+# ==============================================================================
+output "codedeploy_app_name" {
+  description = "Name of the CodeDeploy application"
+  value       = aws_codedeploy_app.strapi.name
+}
+
+output "codedeploy_deployment_group_name" {
+  description = "Name of the CodeDeploy deployment group"
+  value       = aws_codedeploy_deployment_group.strapi.deployment_group_name
+}
+
+# ==============================================================================
+# CLOUDWATCH LOG GROUP
 # ==============================================================================
 output "cloudwatch_log_group" {
   description = "CloudWatch log group name"
   value       = aws_cloudwatch_log_group.strapi.name
-}
-
-output "cloudwatch_dashboard_name" {
-  description = "CloudWatch dashboard name"
-  value       = aws_cloudwatch_dashboard.strapi.dashboard_name
-}
-
-output "sns_topic_arn" {
-  description = "SNS topic ARN for alerts"
-  value       = aws_sns_topic.alerts.arn
 }
 
 # ==============================================================================

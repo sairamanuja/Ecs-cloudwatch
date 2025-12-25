@@ -320,7 +320,7 @@ Go to your repository → **Settings** → **Secrets and variables** → **Actio
 
 Add the following secrets:
 
-| Secret Name | Value |
+| Secret Name | Value |`
 |------------|-------|
 | `AWS_ACCESS_KEY_ID` | Your AWS access key |
 | `AWS_SECRET_ACCESS_KEY` | Your AWS secret key |
