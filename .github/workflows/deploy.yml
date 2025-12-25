@@ -10,10 +10,10 @@ on:
 
 env:
   AWS_REGION: ap-south-1
-  ECR_REPOSITORY: strapi
-  ECS_CLUSTER: strapi-cluster
-  ECS_SERVICE: strapi-service
-  TASK_FAMILY: strapi-task
+  ECR_REPOSITORY: strapi-ramanuja
+  ECS_CLUSTER: strapi-ramanuja-cluster
+  ECS_SERVICE: strapi-ramanuja-service
+  TASK_FAMILY: strapi-ramanuja-task
 
 jobs:
   deploy:
@@ -40,24 +40,28 @@ jobs:
           IMAGE=${{ steps.ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ github.sha }}
           docker build -t $IMAGE .
           docker push $IMAGE
-          echo "IMAGE=$IMAGE" >> $GITHUB_ENV
 
-      - name: Deploy to ECS
+      - name: Download Task Definition
         run: |
-          # Get current task definition and clean it
-          aws ecs describe-task-definition --task-definition $TASK_FAMILY \
+          aws ecs describe-task-definition --task-definition ${{ env.TASK_FAMILY }} \
             --query 'taskDefinition' | \
-          jq 'del(.taskDefinitionArn, .revision, .status, .requiresAttributes, .compatibilities, .registeredAt, .registeredBy)' > task-def.json
-          
-          # Update image
-          jq --arg IMAGE "$IMAGE" '.containerDefinitions[0].image = $IMAGE' task-def.json > task-def-updated.json
-          
-          # Register new task definition
-          aws ecs register-task-definition --cli-input-json file://task-def-updated.json
-          
-          # Update service
-          aws ecs update-service \
-            --cluster $ECS_CLUSTER \
-            --service $ECS_SERVICE \
-            --task-definition $TASK_FAMILY \
-            --force-new-deployment
+          jq 'del(.taskDefinitionArn, .revision, .status, .requiresAttributes, .compatibilities, .registeredAt, .registeredBy)' > task-definition.json
+
+      - name: Fill in the new image ID
+        id: task-def
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: task-definition.json
+          container-name: strapi
+          image: ${{ steps.ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ github.sha }}
+
+      - name: Deploy to ECS via CodeDeploy (Blue/Green)
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v2
+        with:
+          task-definition: ${{ steps.task-def.outputs.task-definition }}
+          service: ${{ env.ECS_SERVICE }}
+          cluster: ${{ env.ECS_CLUSTER }}
+          codedeploy-appspec: terraform/appspec.json
+          codedeploy-application: strapi-ramanuja-deploy-app
+          codedeploy-deployment-group: strapi-ramanuja-deploy-group
+          wait-for-service-stability: true
