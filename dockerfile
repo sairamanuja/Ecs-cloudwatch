@@ -16,6 +16,7 @@ FROM node:20-alpine
 
 RUN apk add --no-cache libpq
 
+
 WORKDIR /app
 
 COPY --from=build /app/build ./build
