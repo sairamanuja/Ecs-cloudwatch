@@ -290,6 +290,27 @@ alert_email = "your-email@example.com"
 
 ### Step 3: Deploy Infrastructure
 ```bash
+# Create the Terraform backend resources once per AWS account/region
+aws s3api create-bucket \
+  --bucket strapi-terraform-state-839547328448-ap-south-1 \
+  --region ap-south-1 \
+  --create-bucket-configuration LocationConstraint=ap-south-1
+
+aws s3api put-bucket-versioning \
+  --bucket strapi-terraform-state-839547328448-ap-south-1 \
+  --versioning-configuration Status=Enabled
+
+aws s3api put-bucket-encryption \
+  --bucket strapi-terraform-state-839547328448-ap-south-1 \
+  --server-side-encryption-configuration '{"Rules":[{"ApplyServerSideEncryptionByDefault":{"SSEAlgorithm":"AES256"}}]}'
+
+aws dynamodb create-table \
+  --table-name strapi-terraform-state-lock \
+  --attribute-definitions AttributeName=LockID,AttributeType=S \
+  --key-schema AttributeName=LockID,KeyType=HASH \
+  --billing-mode PAY_PER_REQUEST \
+  --region ap-south-1
+
 # Initialize Terraform
 terraform init
 
@@ -689,14 +710,44 @@ module.exports = {
 ```bash
 # List locks
 aws dynamodb scan \
-  --table-name terraform-state-lock \
+  --table-name strapi-terraform-state-lock \
   --region ap-south-1
 
 # Force unlock (use with caution)
 terraform force-unlock <LOCK_ID>
 ```
 
-#### 4. **GitHub Actions Failing**
+#### 4. **Terraform Backend Bucket Missing**
+
+**Symptoms**: "S3 bucket ... does not exist"
+
+**Solution**:
+```bash
+# Create the backend resources, then rerun terraform init
+aws s3api create-bucket \
+  --bucket strapi-terraform-state-839547328448-ap-south-1 \
+  --region ap-south-1 \
+  --create-bucket-configuration LocationConstraint=ap-south-1
+
+aws s3api put-bucket-versioning \
+  --bucket strapi-terraform-state-839547328448-ap-south-1 \
+  --versioning-configuration Status=Enabled
+
+aws s3api put-bucket-encryption \
+  --bucket strapi-terraform-state-839547328448-ap-south-1 \
+  --server-side-encryption-configuration '{"Rules":[{"ApplyServerSideEncryptionByDefault":{"SSEAlgorithm":"AES256"}}]}'
+
+aws dynamodb create-table \
+  --table-name strapi-terraform-state-lock \
+  --attribute-definitions AttributeName=LockID,AttributeType=S \
+  --key-schema AttributeName=LockID,KeyType=HASH \
+  --billing-mode PAY_PER_REQUEST \
+  --region ap-south-1
+
+terraform init
+```
+
+#### 5. **GitHub Actions Failing**
 
 **Check**:
 - GitHub Secrets are set correctly
@@ -706,7 +757,7 @@ terraform force-unlock <LOCK_ID>
 
 **View Logs**: GitHub → Actions tab → Click failed workflow
 
-#### 5. **High CPU/Memory Alerts**
+#### 6. **High CPU/Memory Alerts**
 
 **Immediate**:
 ```bash

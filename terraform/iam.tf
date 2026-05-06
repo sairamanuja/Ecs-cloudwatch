@@ -66,6 +66,8 @@ resource "aws_iam_role_policy_attachment" "ecs_execution_policy" {
 # IAM ROLE FOR CODEDEPLOY
 # ==============================================================================
 resource "aws_iam_role" "codedeploy" {
+  count = var.enable_codedeploy ? 1 : 0
+
   name        = "${var.project_name}-codedeploy-role"
   description = "CodeDeploy service role for ECS Blue/Green deployments"
 
@@ -90,6 +92,8 @@ resource "aws_iam_role" "codedeploy" {
 
 # Attach AWS managed policy for CodeDeploy ECS deployments
 resource "aws_iam_role_policy_attachment" "codedeploy_ecs" {
-  role       = aws_iam_role.codedeploy.name
+  count = var.enable_codedeploy ? 1 : 0
+
+  role       = aws_iam_role.codedeploy[0].name
   policy_arn = "arn:aws:iam::aws:policy/AWSCodeDeployRoleForECS"
 }

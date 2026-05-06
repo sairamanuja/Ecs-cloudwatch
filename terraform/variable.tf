@@ -28,6 +28,12 @@ variable "memory" {
   default     = 1024
 }
 
+variable "enable_codedeploy" {
+  description = "Enable CodeDeploy blue/green deployments for ECS. Disable this when CodeDeploy is not available for the AWS account."
+  type        = bool
+  default     = false
+}
+
 # ==============================================================================
 # DATABASE CONFIGURATION
 # ==============================================================================
@@ -47,6 +53,11 @@ variable "db_password" {
   description = "PostgreSQL database password"
   type        = string
   sensitive   = true
+
+  validation {
+    condition     = can(regex("^[!-~]+$", var.db_password)) && !can(regex("[/@\" ]", var.db_password))
+    error_message = "The RDS password must use printable ASCII characters and cannot contain '/', '@', double quote, or spaces."
+  }
 }
 
 # ==============================================================================

@@ -81,12 +81,12 @@ output "target_group_green_arn" {
 # ==============================================================================
 output "codedeploy_app_name" {
   description = "Name of the CodeDeploy application"
-  value       = aws_codedeploy_app.strapi.name
+  value       = var.enable_codedeploy ? aws_codedeploy_app.strapi[0].name : null
 }
 
 output "codedeploy_deployment_group_name" {
   description = "Name of the CodeDeploy deployment group"
-  value       = aws_codedeploy_deployment_group.strapi.deployment_group_name
+  value       = var.enable_codedeploy ? aws_codedeploy_deployment_group.strapi[0].deployment_group_name : null
 }
 
 # ==============================================================================

@@ -84,9 +84,12 @@ resource "aws_ecs_service" "this" {
   desired_count   = 1
   launch_type     = "FARGATE"
   
-  # Use CODE_DEPLOY for Blue/Green deployment
-  deployment_controller {
-    type = "CODE_DEPLOY"
+  dynamic "deployment_controller" {
+    for_each = var.enable_codedeploy ? [1] : []
+
+    content {
+      type = "CODE_DEPLOY"
+    }
   }
 
   depends_on = [aws_db_instance.strapi, aws_lb_listener.http]
@@ -113,10 +116,6 @@ resource "aws_ecs_service" "this" {
     Name = "${var.project_name}-service"
   }
 
-  # CodeDeploy manages the task definition and target groups after initial creation
-  lifecycle {
-    ignore_changes = [task_definition, load_balancer]
-  }
 }
 
 # ==============================================================================

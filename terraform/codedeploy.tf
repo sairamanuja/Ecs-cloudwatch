@@ -2,6 +2,8 @@
 # CODEDEPLOY APPLICATION
 # ==============================================================================
 resource "aws_codedeploy_app" "strapi" {
+  count = var.enable_codedeploy ? 1 : 0
+
   name             = "${var.project_name}-deploy-app"
   compute_platform = "ECS"
 
@@ -14,9 +16,11 @@ resource "aws_codedeploy_app" "strapi" {
 # CODEDEPLOY DEPLOYMENT GROUP
 # ==============================================================================
 resource "aws_codedeploy_deployment_group" "strapi" {
-  app_name               = aws_codedeploy_app.strapi.name
+  count = var.enable_codedeploy ? 1 : 0
+
+  app_name               = aws_codedeploy_app.strapi[0].name
   deployment_group_name  = "${var.project_name}-deploy-group"
-  service_role_arn       = aws_iam_role.codedeploy.arn
+  service_role_arn       = aws_iam_role.codedeploy[0].arn
   deployment_config_name = "CodeDeployDefault.ECSCanary10Percent5Minutes"
 
   # Tell CodeDeploy this is for ECS
